@@ -14,7 +14,7 @@ interface PhotoData {
   albumId: number;
   albumName?: string;
   createdAt: string;
-  compressionQuality?: number;
+  compressionQuality: number | null;
 }
 
 /**
@@ -199,7 +199,7 @@ export function PhotoManager() {
       setSelectedPhotoIds(selectedRowKeys as number[]);
     },
     getCheckboxProps: (record: PhotoData) => ({
-      name: record.id,
+      name: record.id.toString(),
     }),
     preserveSelectedRowKeys: true,
   };

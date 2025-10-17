@@ -1,39 +1,59 @@
 import { AlbumCard } from "@/components/AlbumCard";
-import { AppDataSource } from "@/db/data-source";
-import { Album } from "@/db/entities/Album";
 import { ConfigProvider, theme, Button, Empty } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import "@ant-design/v5-patch-for-react-19";
+
+export const dynamic = 'force-dynamic';
 
 /**
  * 首页组件
  * 显示相册列表，支持移动端优化
  */
 export default async function Home() {
-  // 初始化数据库连接
-  if (!AppDataSource.isInitialized) {
-    await AppDataSource.initialize();
+  // 尝试获取相册列表，如果数据库不可用则显示空列表
+  let serializedAlbums: Array<{
+    id: number;
+    name: string;
+    createdAt: string;
+    photos: Array<{
+      id: number;
+      url: string;
+    }>;
+  }> = [];
+  
+  try {
+    // 动态导入数据库相关模块，避免构建时加载
+    const { AppDataSource } = await import("@/db/data-source");
+    const { Album } = await import("@/db/entities/Album");
+    
+    // 初始化数据库连接
+    if (!AppDataSource.isInitialized) {
+      await AppDataSource.initialize();
+    }
+
+    // 获取相册列表
+    const albumRepository = AppDataSource.getRepository(Album);
+    const albums = await albumRepository.find({
+      relations: ["photos"],
+      order: { createdAt: "DESC" },
+    });
+
+    // 将 TypeORM 实体转换为普通对象，以便传递给客户端组件
+    serializedAlbums = albums.map((album) => ({
+      id: album.id,
+      name: album.name,
+      createdAt: album.createdAt.toISOString(),
+      photos:
+        album.photos?.map((photo) => ({
+          id: photo.id,
+          url: photo.url,
+        })) || [],
+    }));
+  } catch (error) {
+    console.error("数据库连接失败，显示空列表:", error);
+    // 如果数据库连接失败，继续使用空列表
   }
-
-  // 获取相册列表
-  const albumRepository = AppDataSource.getRepository(Album);
-  const albums = await albumRepository.find({
-    relations: ["photos"],
-    order: { createdAt: "DESC" },
-  });
-
-  // 将 TypeORM 实体转换为普通对象，以便传递给客户端组件
-  const serializedAlbums = albums.map((album) => ({
-    id: album.id,
-    name: album.name,
-    createdAt: album.createdAt.toISOString(),
-    photos:
-      album.photos?.map((photo) => ({
-        id: photo.id,
-        url: photo.url,
-      })) || [],
-  }));
 
   return (
     <ConfigProvider

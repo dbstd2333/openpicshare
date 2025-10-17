@@ -29,7 +29,7 @@ export function middleware(request: NextRequest) {
         return acc;
       }, {} as Record<string, string>);
       
-      token = cookies["auth-token"];
+      token = cookies?.["auth-token"];
     }
     
     // 添加调试日志

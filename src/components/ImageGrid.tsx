@@ -10,7 +10,7 @@ interface PhotoData {
   id: number;
   url: string;
   albumId: number;
-  compressionQuality?: number;
+  compressionQuality: number | null;
   createdAt: string;
 }
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, Form, Select, Upload, Button, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
+import type { UploadFile } from "antd/es/upload/interface";
 
 /**
  * 上传面板组件
@@ -10,6 +11,7 @@ import { UploadOutlined } from "@ant-design/icons";
  */
 export function UploadPanel() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploadFileList, setUploadFileList] = useState<UploadFile<any>[]>([]);
   const [albumId, setAlbumId] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -128,6 +130,7 @@ export function UploadPanel() {
       }
 
       setSelectedFiles([]);
+      setUploadFileList([]);
       setUploadProgress(0);
       // 重新加载页面以显示新图片
       window.location.reload();
@@ -161,14 +164,24 @@ export function UploadPanel() {
             multiple
             beforeUpload={(file, fileList) => {
               setSelectedFiles(fileList);
+              // 转换为 UploadFile 格式
+              const uploadFiles: UploadFile<any>[] = fileList.map((file) => ({
+                uid: file.name + Date.now(), // 使用文件名和时间戳作为唯一ID
+                name: file.name,
+                status: 'done',
+                originFileObj: file,
+              }));
+              setUploadFileList(uploadFiles);
               return false; // 阻止自动上传
             }}
-            fileList={selectedFiles}
+            fileList={uploadFileList}
             accept="image/*"
             showUploadList={{ showRemoveIcon: true }}
             onRemove={(file) => {
-              const newFiles = selectedFiles.filter((f) => f.uid !== file.uid);
+              const newFiles = selectedFiles.filter((f) => f.name !== file.name);
               setSelectedFiles(newFiles);
+              const newUploadFiles = uploadFileList.filter((f) => f.uid !== file.uid);
+              setUploadFileList(newUploadFiles);
             }}
           >
             <Button icon={<UploadOutlined />}>选择图片(支持多选)</Button>

@@ -9,7 +9,7 @@ import { Photo } from "./entities/Photo";
  * 开发环境使用47.108.148.124，生产环境使用172.19.12.137
  */
 function getDatabaseUrl(): string {
-  const isProduction = Deno.env.has("DENO_ENV") === "production";
+  const isProduction = process.env.NODE_ENV === "production";
   const host = isProduction ? "172.19.12.137" : "47.108.148.124";
   return `postgresql://pic:mayGYZfTcZMxJDMf@${host}:5432/pic`;
 }
@@ -24,4 +24,10 @@ export const AppDataSource = new DataSource({
   synchronize: true,
   logging: false,
   entities: [User, Album, Photo],
+  // 添加连接池配置以提高稳定性
+  extra: {
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
+  },
 });

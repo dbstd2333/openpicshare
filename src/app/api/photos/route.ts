@@ -2,19 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { AppDataSource } from "@/db/data-source";
 import { Photo } from "@/db/entities/Photo";
 import { Album } from "@/db/entities/Album";
+import { ensureDataSourceInitialized } from "@/db/init";
 import { writeFile, mkdir, unlink } from "fs/promises";
 import { join } from "path";
 import { randomBytes } from "crypto";
 import { existsSync } from "fs";
-
-/**
- * 确保数据源已初始化
- */
-async function ensureDataSourceInitialized() {
-  if (!AppDataSource.isInitialized) {
-    await AppDataSource.initialize();
-  }
-}
 
 /**
  * 照片相关接口
@@ -113,11 +105,17 @@ export async function POST(req: NextRequest) {
     
     // 保存到数据库
     const photoRepository = AppDataSource.getRepository(Photo);
-    const photo = photoRepository.create({
+    const photoData: any = {
       albumId: parseInt(albumId),
-      url: `/uploads/${filename}`,
-      compressionQuality: compressionQuality ? parseInt(compressionQuality) : null
-    });
+      url: `/uploads/${filename}`
+    };
+    
+    // 只有当compressionQuality有值时才添加到对象中
+    if (compressionQuality) {
+      photoData.compressionQuality = parseInt(compressionQuality);
+    }
+    
+    const photo = photoRepository.create(photoData);
     await photoRepository.save(photo);
     
     return NextResponse.json(photo);

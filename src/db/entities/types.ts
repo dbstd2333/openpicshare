@@ -11,6 +11,7 @@ export interface PhotoEntity {
   id: number;
   albumId: number;
   url: string;
+  compressionQuality: number | null;
   createdAt: Date;
   album: AlbumEntity;
 }

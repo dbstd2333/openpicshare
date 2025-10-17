@@ -9,14 +9,14 @@ import { Photo } from "./Photo";
 @Entity()
 export class Album implements AlbumEntity {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  name: string;
+  name!: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @OneToMany(() => Photo, (photo) => photo.album)
-  photos: PhotoEntity[];
+  photos!: PhotoEntity[];
 }

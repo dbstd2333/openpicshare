@@ -15,20 +15,20 @@ import { Album } from "./Album";
 @Entity()
 export class Photo implements PhotoEntity {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  albumId: number;
+  albumId!: number;
 
   @Column()
-  url: string;
+  url!: string;
 
-  @Column({ nullable: true })
-  compressionQuality: number;
+  @Column({ type: "float", nullable: true })
+  compressionQuality: number | null = null;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @ManyToOne(() => Album, (album) => album.photos, { onDelete: "CASCADE" })
-  album: AlbumEntity;
+  album!: AlbumEntity;
 }

@@ -1,15 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AppDataSource } from "@/db/data-source";
 import { Album } from "@/db/entities/Album";
-
-/**
- * 确保数据源已初始化
- */
-async function ensureDataSourceInitialized() {
-  if (!AppDataSource.isInitialized) {
-    await AppDataSource.initialize();
-  }
-}
+import { ensureDataSourceInitialized } from "@/db/init";
 
 /**
  * 相册CRUD接口
